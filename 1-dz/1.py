@@ -2,11 +2,14 @@ import heapq
 from collections import defaultdict
 
 def min_bottleneck_path(n, edges, start, end):
+    # Строим граф: для каждой вершины список соседей и весов рёбер
     graph = defaultdict(list)
     for u, v, w in edges:
         graph[u].append((v, w))
-        graph[v].append((u, w))
+        graph[v].append((u, w)) # граф неориентированный
     
+    # bottleneck[i] — лучшее (минимальное) узкое место пути до вершины i
+    # Пока пути не найдены — ставим бесконечность
     bottleneck = [float('inf')] * n
     bottleneck[start] = 0
 
@@ -15,15 +18,20 @@ def min_bottleneck_path(n, edges, start, end):
     while pq:
         current_bottleneck, u = heapq.heappop(pq)
 
+        # Если эту вершину уже обработали с лучшим результатом — пропускаем
         if current_bottleneck > bottleneck[u]:
             continue
 
+        # Дошли до цели - ответ найден
         if u == end:
             return current_bottleneck
-
+        
+        # Проходим по всем соседям
         for v, weight in graph[u]:
+            # Узкое место нового пути = максимум из текущего и веса нового ребра
             new_bottleneck = max(current_bottleneck, weight)
             
+            # Если нашли путь лучше — запоминаем и кладём в кучу
             if new_bottleneck < bottleneck[v]:
                 bottleneck[v] = new_bottleneck
                 heapq.heappush(pq, (new_bottleneck, v))
